@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Links - Reagan Cao</title>
+  <meta name="description" content="Find me on social media">
+  <link rel="icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --background: #0d0d0f;
+      --foreground: #f0f0f0;
+      --card: #141418;
+      --card-foreground: #f0f0f0;
+      --border: #2a2a30;
+      --muted-foreground: #a0a0a0;
+      --secondary: #1e1e24;
+    }
+
+    body {
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Circuit Background Canvas */
+    #circuit-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(to bottom, #000000, #0a0a0a);
+    }
+
+    /* Main Layout */
+    main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 24rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.025em;
+    }
+
+    .header p {
+      margin-top: 0.5rem;
+      color: var(--muted-foreground);
+      font-size: 0.875rem;
+    }
+
+    /* Social Links */
+    .social-links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: rgba(20, 20, 24, 0.8);
+      backdrop-filter: blur(8px);
+      color: var(--card-foreground);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .social-link:hover {
+      background: rgba(30, 30, 36, 0.8);
+      border-color: rgba(160, 160, 160, 0.3);
+    }
+
+    .social-link svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--muted-foreground);
+      transition: color 0.2s ease;
+    }
+
+    .social-link:hover svg {
+      color: var(--foreground);
+    }
+
+    /* GitHub Activity Card */
+    .github-card {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: rgba(20, 20, 24, 0.8);
+      backdrop-filter: blur(8px);
+      padding: 1.5rem;
+    }
+
+    .github-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .github-tab {
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .github-tab:hover,
+    .github-tab.active {
+      color: var(--foreground);
+    }
+
+    .github-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .github-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+
+    .github-item svg {
+      width: 1rem;
+      height: 1rem;
+      margin-top: 0.125rem;
+      color: var(--foreground);
+      flex-shrink: 0;
+    }
+
+    .github-item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .github-item-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .github-item-time {
+      font-size: 0.75rem;
+      color: rgba(160, 160, 160, 0.7);
+    }
+
+    /* Project specific styles */
+    .github-project {
+      text-decoration: none;
+      color: var(--muted-foreground);
+      transition: color 0.2s ease;
+    }
+
+    .github-project:hover {
+      color: var(--foreground);
+    }
+
+    .github-project-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      color: var(--foreground);
+    }
+
+    .github-project-name svg.external {
+      width: 0.75rem;
+      height: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .github-project:hover .github-project-name svg.external {
+      opacity: 1;
+    }
+
+    .github-project-desc {
+      font-size: 0.75rem;
+      color: rgba(160, 160, 160, 0.7);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .github-project-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+    }
+
+    .github-project-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .lang-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+    }
+
+    .github-project-meta svg {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      height: 3rem;
+      background: rgba(30, 30, 36, 0.5);
+      border-radius: 0.25rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="circuit-canvas"></canvas>
+  
+  <main>
+    <div class="container">
+      <div class="header">
+        <h1>Reagan Cao</h1>
+        <p>San Diego, CA</p>
+      </div>
+
+      <nav class="social-links">
+        <a href="https://www.instagram.com/reagancao/" target="_blank" rel="noopener noreferrer" class="social-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          <span>Instagram</span>
+        </a>
+        <a href="https://github.com/caoleduong" target="_blank" rel="noopener noreferrer" class="social-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a href="https://www.tiktok.com/@reagan.cao" target="_blank" rel="noopener noreferrer" class="social-link">
+          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+          <span>TikTok</span>
+        </a>
+        <a href="https://caoleduong.github.io/" target="_blank" rel="noopener noreferrer" class="social-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          <span>Website</span>
+        </a>
+      </nav>
+
+      <div class="github-card">
+        <div class="github-tabs">
+          <button class="github-tab active" data-tab="activity">Recent Activity</button>
+          <button class="github-tab" data-tab="projects">Projects</button>
+        </div>
+        
+        <div id="loading" class="github-content">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+        
+        <div id="activity-content" class="github-content hidden"></div>
+        <div id="projects-content" class="github-content hidden"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Circuit Background Animation
+    (function() {
+      const canvas = document.getElementById('circuit-canvas');
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const lines = [];
+      const lineCount = 40;
+
+      for (let i = 0; i < lineCount; i++) {
+        lines.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          length: Math.random() * 150 + 50,
+          horizontal: Math.random() > 0.5,
+          speed: Math.random() * 0.3 + 0.1,
+          opacity: Math.random() * 0.5 + 0.1,
+          glowIntensity: Math.random() * 0.5 + 0.5
+        });
+      }
+
+      function animate() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        lines.forEach(line => {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(0, 180, 216, ${line.opacity})`;
+          ctx.lineWidth = 1;
+          ctx.shadowColor = `rgba(0, 180, 216, ${line.glowIntensity})`;
+          ctx.shadowBlur = 8;
+
+          if (line.horizontal) {
+            ctx.moveTo(line.x, line.y);
+            ctx.lineTo(line.x + line.length, line.y);
+            line.x += line.speed;
+            if (line.x > canvas.width) {
+              line.x = -line.length;
+              line.y = Math.random() * canvas.height;
+            }
+          } else {
+            ctx.moveTo(line.x, line.y);
+            ctx.lineTo(line.x, line.y + line.length);
+            line.y += line.speed;
+            if (line.y > canvas.height) {
+              line.y = -line.length;
+              line.x = Math.random() * canvas.width;
+            }
+          }
+
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          if (Math.random() > 0.99) {
+            ctx.fillStyle = `rgba(0, 180, 216, ${line.opacity * 2})`;
+            ctx.fillRect(line.x - 2, line.y - 2, 4, 4);
+          }
+        });
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+
+    // GitHub Activity
+    (function() {
+      const loadingEl = document.getElementById('loading');
+      const activityEl = document.getElementById('activity-content');
+      const projectsEl = document.getElementById('projects-content');
+      const tabs = document.querySelectorAll('.github-tab');
+
+      let events = [];
+      let repos = [];
+
+      const languageColors = {
+        JavaScript: '#f7df1e',
+        TypeScript: '#3178c6',
+        Python: '#3572A5',
+        Java: '#b07219',
+        HTML: '#e34c26',
+        CSS: '#563d7c',
+        Go: '#00ADD8',
+        Rust: '#dea584',
+        Ruby: '#701516'
+      };
+
+      function getEventIcon(type) {
+        const icons = {
+          PushEvent: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="3" x2="9" y1="12" y2="12"/><line x1="15" x2="21" y1="12" y2="12"/></svg>',
+          PullRequestEvent: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/></svg>',
+          WatchEvent: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+          ForkEvent: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/></svg>'
+        };
+        return icons[type] || icons.PushEvent;
+      }
+
+      function getEventText(event) {
+        const repoName = event.repo.name.split('/')[1];
+        const texts = {
+          PushEvent: `Pushed to ${repoName}`,
+          PullRequestEvent: `${event.payload.action} PR in ${repoName}`,
+          WatchEvent: `Starred ${repoName}`,
+          ForkEvent: `Forked ${repoName}`,
+          CreateEvent: `Created ${event.payload.ref_type} in ${repoName}`
+        };
+        return texts[event.type] || `Activity in ${repoName}`;
+      }
+
+      function getTimeAgo(date) {
+        const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        return `${Math.floor(seconds / 86400)}d ago`;
+      }
+
+      function renderActivity() {
+        activityEl.innerHTML = events.map(event => `
+          <div class="github-item">
+            ${getEventIcon(event.type)}
+            <div class="github-item-content">
+              <p class="github-item-text">${getEventText(event)}</p>
+              <p class="github-item-time">${getTimeAgo(event.created_at)}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function renderProjects() {
+        projectsEl.innerHTML = repos.map(repo => `
+          <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="github-item github-project">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="m9 13 3 3 3-3"/></svg>
+            <div class="github-item-content">
+              <div class="github-project-name">
+                ${repo.name}
+                <svg class="external" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+              </div>
+              ${repo.description ? `<p class="github-project-desc">${repo.description}</p>` : ''}
+              <div class="github-project-meta">
+                ${repo.language ? `<span><span class="lang-dot" style="background-color: ${languageColors[repo.language] || '#8b949e'}"></span>${repo.language}</span>` : ''}
+                ${repo.stargazers_count > 0 ? `<span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${repo.stargazers_count}</span>` : ''}
+              </div>
+            </div>
+          </a>
+        `).join('');
+      }
+
+      function showTab(tab) {
+        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+        
+        activityEl.classList.toggle('hidden', tab !== 'activity');
+        projectsEl.classList.toggle('hidden', tab !== 'projects');
+      }
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => showTab(tab.dataset.tab));
+      });
+
+      // Fetch data
+      Promise.all([
+        fetch('https://api.github.com/users/caoleduong/events/public').then(res => res.json()),
+        fetch('https://api.github.com/users/caoleduong/repos?sort=updated&per_page=5').then(res => res.json())
+      ]).then(([eventsData, reposData]) => {
+        events = eventsData.slice(0, 5);
+        repos = reposData;
+        
+        loadingEl.classList.add('hidden');
+        activityEl.classList.remove('hidden');
+        
+        renderActivity();
+        renderProjects();
+      }).catch(() => {
+        loadingEl.innerHTML = '<p style="color: var(--muted-foreground); font-size: 0.875rem;">Unable to load GitHub data</p>';
+      });
+    })();
+  </script>
+</body>
+</html>
