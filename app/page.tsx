@@ -1,7 +1,8 @@
-import { Instagram, Github, Globe } from "lucide-react"
+import { Instagram, Github, Globe, Code, MessageCircle } from "lucide-react"
 import { TikTokIcon } from "@/components/tiktok-icon"
 import { GitHubActivity } from "@/components/github-activity"
 import { CircuitBackground } from "@/components/circuit-background"
+import { BackgroundMusic } from "@/components/background-music"
 
 const socialLinks = [
   {
@@ -24,12 +25,23 @@ const socialLinks = [
     href: "https://caoleduong.github.io/",
     icon: Globe,
   },
+  {
+    name: "Zalo",
+    href: "https://zaloapp.com/qr/p/1b4zra00lvl19?src=qr",
+    icon: MessageCircle,
+  },
+  {
+    name: "Source Code",
+    href: "https://github.com/caoleduong/caoleduong.github.io",
+    icon: Code,
+  },
 ]
 
 export default function LinksPage() {
   return (
     <>
       <CircuitBackground />
+      <BackgroundMusic />
       <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm flex flex-col items-center gap-8">
           <div className="text-center">
