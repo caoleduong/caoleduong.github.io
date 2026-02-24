@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #ffffff;
+            --sub-text: #888;
+            --panel-bg: #1a1a1a;
+            --input-bg: #2a2a2a;
+            --input-text: #ffffff;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #3498db;
+        }
+
+        body.light-mode {
+            --bg-color: #ffffff;
+            --text-color: #1a1a1a;
+            --sub-text: #666;
+            --panel-bg: #f5f5f5;
+            --input-bg: #ffffff;
+            --input-text: #1a1a1a;
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background 0.3s ease;
+        }
+
+        .container { text-align: center; user-select: none; padding: 20px; width: 100%; }
+
+        .weather-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(128, 128, 128, 0.1);
+            padding: 8px 20px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+        }
+
+        #time {
+            font-size: clamp(3.5rem, 15vw, 9rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #date {
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        #calendar-label {
+            font-size: 0.7rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        #location-display {
+            font-size: 0.9rem;
+            color: var(--sub-text);
+            margin-top: 15px;
+        }
+
+        .settings-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #settings-menu {
+            position: fixed;
+            bottom: 85px;
+            right: 25px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+
+        .setting-item { margin-bottom: 15px; position: relative; text-align: left; }
+        label { display: block; font-size: 0.7rem; margin-bottom: 6px; color: var(--sub-text); text-transform: uppercase; font-weight: bold; }
+
+        select, .custom-input, .menu-btn { 
+            width: 100%; padding: 10px; background: var(--input-bg); color: var(--input-text); 
+            border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; 
+        }
+
+        .dropdown-list {
+            position: absolute; bottom: 100%; left: 0; width: 100%; background: var(--panel-bg);
+            border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto;
+            display: none; margin-bottom: 5px; z-index: 1001;
+        }
+
+        .dropdown-item { padding: 10px; cursor: pointer; font-size: 0.85rem; }
+        .dropdown-item:hover { background: var(--accent); color: white; }
+        .menu-btn { cursor: pointer; font-weight: 600; margin-top: 10px; border: none; }
+    </style>
+</head>
+<body>
+
+    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+
+    <div id="settings-menu">
+        <div class="setting-item">
+            <label id="lbl-lang">Language</label>
+            <select id="langSelect" onchange="saveSettings()"></select>
+        </div>
+
+        <div class="setting-item">
+            <label id="lbl-cal">Calendar System</label>
+            <select id="calendarSelect" onchange="saveSettings()"></select>
+        </div>
+
+        <div class="setting-item">
+            <label id="lbl-format">Clock Format</label>
+            <select id="formatSelect" onchange="saveSettings()">
+                <option value="24" selected>24-Hour</option>
+                <option value="12">12-Hour</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <label id="lbl-unit">Temperature Unit</label>
+            <select id="unitSelect" onchange="saveSettings()">
+                <option value="C">Celsius (°C)</option>
+                <option value="F">Fahrenheit (°F)</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <label id="lbl-search">Search Time Zone</label>
+            <input type="text" id="zoneInput" class="custom-input" onfocus="showList()" oninput="filterZones()">
+            <div id="zoneList" class="dropdown-list"></div>
+        </div>
+
+        <button class="menu-btn" id="btn-theme" onclick="toggleTheme()">🌓 Toggle Appearance</button>
+    </div>
+
+    <div class="container">
+        <div class="weather-box" id="weather-box">
+            <span id="weather-temp">--</span>
+            <span id="weather-desc">...</span>
+        </div>
+        <div id="time">00:00:00</div>
+        <span id="calendar-label"></span>
+        <div id="date">...</div>
+        <div id="location-display"></div>
+    </div>
+
+    <script>
+        const langCodes = ["en-US", "ar-SA", "bn-BD", "zh-CN", "cs-CZ", "fr-FR", "de-DE", "hi-IN", "id-ID", "ja-JP", "ko-KR", "pt-PT", "ru-RU", "es-ES", "th-TH", "tr-TR", "vi-VN"];
+        const calCodes = ["gregory", "chinese", "buddhist", "islamic", "persian", "hebrew", "indian", "japanese"];
+        
+        const translations = {
+            "en-US": { lang: "Language", cal: "Calendar System", format: "Clock Format", unit: "Temperature Unit", search: "Search Time Zone", theme: "🌓 Toggle Appearance", auto: "Auto-Detect", placeholder: "Search City...", humidity: "Humidity" },
+            "ar-SA": { lang: "اللغة", cal: "نظام التقويم", format: "تنسيق الوقت", unit: "وحدة الحرارة", search: "بحث عن المنطقة الزمنية", theme: "🌓 تغيير المظهر", auto: "كشف تلقائي", placeholder: "بحث عن مدينة...", humidity: "رطوبة" },
+            "zh-CN": { lang: "语言", cal: "日历系统", format: "时钟格式", unit: "温度单位", search: "搜索时区", theme: "🌓 切换外观", auto: "自动检测", placeholder: "搜索城市...", humidity: "湿度" },
+            // ... (Additional translations would follow this pattern)
+        };
+
+        const state = { is24Hour: true, timeZone: 'auto', lang: 'en-US', calendar: 'gregory', unit: 'C' };
+        let allZones = Intl.supportedValuesOf('timeZone');
+
+        function translateUI() {
+            const t = translations[state.lang] || translations["en-US"];
+            const langDisplay = new Intl.DisplayNames([state.lang], { type: 'language' });
+            
+            document.getElementById('lbl-lang').textContent = t.lang;
+            document.getElementById('lbl-cal').textContent = t.cal;
+            document.getElementById('lbl-format').textContent = t.format;
+            document.getElementById('lbl-unit').textContent = t.unit;
+            document.getElementById('lbl-search').textContent = t.search;
+            document.getElementById('btn-theme').textContent = t.theme;
+            document.getElementById('zoneInput').placeholder = t.placeholder;
+
+            const langSelect = document.getElementById('langSelect');
+            const currentLang = langSelect.value;
+            langSelect.innerHTML = '';
+            langCodes.forEach(code => {
+                const opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = langDisplay.of(code.split('-')[0]);
+                langSelect.appendChild(opt);
+            });
+            langSelect.value = currentLang || state.lang;
+
+            const calSelect = document.getElementById('calendarSelect');
+            const currentCal = calSelect.value;
+            calSelect.innerHTML = '';
+            calCodes.forEach(code => {
+                const opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = code.charAt(0).toUpperCase() + code.slice(1); 
+                calSelect.appendChild(opt);
+            });
+            calSelect.value = currentCal || state.calendar;
+
+            renderZoneList(allZones);
+        }
+
+        function renderZoneList(zones) {
+            const list = document.getElementById('zoneList');
+            const t = translations[state.lang] || translations["en-US"];
+            list.innerHTML = `<div class="dropdown-item" onclick="selectZone('auto')">${t.auto}</div>`;
+            zones.forEach(zone => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = zone.split('/').pop().replace(/_/g, ' ');
+                item.onclick = () => selectZone(zone);
+                list.appendChild(item);
+            });
+        }
+
+        function showList() { document.getElementById('zoneList').style.display = 'block'; }
+        function filterZones() {
+            const val = document.getElementById('zoneInput').value.toLowerCase();
+            renderZoneList(allZones.filter(z => z.toLowerCase().includes(val)));
+        }
+
+        function selectZone(zone) {
+            state.timeZone = zone;
+            const t = translations[state.lang] || translations["en-US"];
+            document.getElementById('zoneInput').value = zone === 'auto' ? t.auto : zone.split('/').pop().replace(/_/g, ' ');
+            document.getElementById('zoneList').style.display = 'none';
+            saveSettings();
+        }
+
+        function toggleSettings() {
+            const menu = document.getElementById('settings-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+
+        function saveSettings() {
+            state.is24Hour = document.getElementById('formatSelect').value === '24';
+            state.lang = document.getElementById('langSelect').value;
+            state.calendar = document.getElementById('calendarSelect').value;
+            state.unit = document.getElementById('unitSelect').value;
+            localStorage.setItem('clockSettingsV11', JSON.stringify(state));
+            translateUI();
+            updateClock();
+            updateWeather();
+        }
+
+        function updateWeather() {
+            const t = translations[state.lang] || translations["en-US"];
+            let tempC = 22; // Base dummy data
+            let displayTemp = state.unit === 'F' ? Math.round((tempC * 9/5) + 32) : tempC;
+            
+            document.getElementById('weather-temp').textContent = `${displayTemp}°${state.unit}`;
+            document.getElementById('weather-desc').textContent = `☀️ | ${t.humidity}: 45%`;
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('clockSettingsV11');
+            if (saved) {
+                Object.assign(state, JSON.parse(saved));
+                document.getElementById('formatSelect').value = state.is24Hour ? '24' : '12';
+                document.getElementById('unitSelect').value = state.unit;
+            }
+            if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+            translateUI();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const tz = state.timeZone === 'auto' ? Intl.DateTimeFormat().resolvedOptions().timeZone : state.timeZone;
+            
+            const timeStr = now.toLocaleTimeString(state.lang, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: !state.is24Hour, timeZone: tz });
+            const dateStr = now.toLocaleDateString(`${state.lang}-u-ca-${state.calendar}`, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz });
+
+            document.getElementById('time').textContent = timeStr;
+            document.getElementById('date').textContent = dateStr;
+            document.getElementById('calendar-label').textContent = state.calendar;
+            document.getElementById('location-display').textContent = tz.replace(/_/g, ' ');
+            document.body.dir = state.lang.startsWith('ar') ? 'rtl' : 'ltr';
+        }
+
+        document.addEventListener('click', (e) => { if (!e.target.closest('.setting-item')) document.getElementById('zoneList').style.display = 'none'; });
+        loadSettings();
+        setInterval(updateClock, 1000);
+        updateClock();
+        updateWeather();
+    </script>
+</body>
+</html>
