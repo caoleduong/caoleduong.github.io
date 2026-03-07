@@ -14,6 +14,11 @@
             --input-text: #ffffff;
             --border: rgba(255, 255, 255, 0.1);
             --accent: #3498db;
+            --time-color: #ffffff;
+            --date-color: #ffffff;
+            --calendar-color: #3498db;
+            --location-color: #888888;
+            --weather-color: #ffffff;
         }
 
         body.light-mode {
@@ -24,7 +29,14 @@
             --input-bg: #ffffff;
             --input-text: #1a1a1a;
             --border: rgba(0, 0, 0, 0.1);
+            --time-color: #1a1a1a;
+            --date-color: #1a1a1a;
+            --calendar-color: #3498db;
+            --location-color: #666666;
+            --weather-color: #1a1a1a;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             background-color: var(--bg-color);
@@ -35,21 +47,47 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            transition: background 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .container { text-align: center; user-select: none; padding: 20px; width: 100%; }
+        #background-media {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container { text-align: center; user-select: none; padding: 20px; width: 100%; z-index: 1; position: relative; }
 
         .weather-box {
             display: inline-flex;
             align-items: center;
             gap: 15px;
             background: rgba(128, 128, 128, 0.1);
+            backdrop-filter: blur(10px);
             padding: 8px 20px;
             border-radius: 50px;
             margin-bottom: 20px;
             font-size: 0.9rem;
             border: 1px solid var(--border);
+            color: var(--weather-color);
         }
 
         #time {
@@ -58,33 +96,123 @@
             line-height: 1.1;
             margin: 0;
             font-variant-numeric: tabular-nums;
+            color: var(--time-color);
+            transition: color 0.3s ease;
         }
 
         #date {
             font-size: clamp(1rem, 4vw, 1.4rem);
             margin-top: 1rem;
             font-weight: 500;
+            color: var(--date-color);
+            transition: color 0.3s ease;
         }
 
         #calendar-label {
             font-size: 0.7rem;
-            color: var(--accent);
+            color: var(--calendar-color);
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-top: 10px;
             display: block;
+            transition: color 0.3s ease;
         }
 
         #location-display {
             font-size: 0.9rem;
-            color: var(--sub-text);
+            color: var(--location-color);
             margin-top: 15px;
+            transition: color 0.3s ease;
         }
 
-        .settings-btn {
+        /* Analog Clock Styles */
+        .analog-clock {
+            width: clamp(200px, 40vw, 350px);
+            height: clamp(200px, 40vw, 350px);
+            border: 4px solid var(--time-color);
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto 20px;
+            background: rgba(128, 128, 128, 0.1);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .analog-clock.active { display: block; }
+        #time.hidden { display: none; }
+
+        .analog-clock .center-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background: var(--time-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .analog-clock .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 4px;
+        }
+
+        .analog-clock .hour-hand {
+            width: 6px;
+            height: 25%;
+            background: var(--time-color);
+            margin-left: -3px;
+        }
+
+        .analog-clock .minute-hand {
+            width: 4px;
+            height: 35%;
+            background: var(--time-color);
+            margin-left: -2px;
+        }
+
+        .analog-clock .second-hand {
+            width: 2px;
+            height: 40%;
+            background: var(--accent);
+            margin-left: -1px;
+        }
+
+        .analog-clock .hour-marker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .analog-clock .hour-marker::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            width: 3px;
+            height: 12px;
+            background: var(--time-color);
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Button Container */
+        .btn-container {
             position: fixed;
             bottom: 25px;
             right: 25px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .settings-btn, .customize-btn {
             background: var(--panel-bg);
             border: 1px solid var(--border);
             color: var(--text-color);
@@ -96,10 +224,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, background 0.2s;
         }
 
-        #settings-menu {
+        .settings-btn:hover, .customize-btn:hover {
+            transform: scale(1.1);
+        }
+
+        #settings-menu, #customize-menu {
             position: fixed;
             bottom: 85px;
             right: 25px;
@@ -108,11 +241,25 @@
             padding: 20px;
             border-radius: 12px;
             display: none;
-            width: 300px;
-            max-height: 80vh;
+            width: 320px;
+            max-height: 75vh;
             overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             z-index: 999;
+            backdrop-filter: blur(10px);
+        }
+
+        #customize-menu {
+            right: 80px;
+        }
+
+        .menu-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-color);
         }
 
         .setting-item { margin-bottom: 15px; position: relative; text-align: left; }
@@ -131,14 +278,337 @@
 
         .dropdown-item { padding: 10px; cursor: pointer; font-size: 0.85rem; }
         .dropdown-item:hover { background: var(--accent); color: white; }
-        .menu-btn { cursor: pointer; font-weight: 600; margin-top: 10px; border: none; }
+        .menu-btn { cursor: pointer; font-weight: 600; margin-top: 10px; border: none; transition: background 0.2s; }
+        .menu-btn:hover { background: var(--accent); color: white; }
+
+        /* Color Picker Styles */
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .color-row label {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 2px;
+            background: var(--input-bg);
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-picker::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+        /* Section Divider */
+        .section-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        /* Toggle Switch */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .toggle-row label {
+            margin-bottom: 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--sub-text);
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+            background-color: white;
+        }
+
+        /* Theme Presets */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .theme-preset {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: var(--input-bg);
+        }
+
+        .theme-preset:hover {
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .theme-preset.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        /* File Upload */
+        .file-upload-wrapper {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--sub-text);
+            transition: all 0.2s;
+        }
+
+        .file-upload-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .file-upload-btn input {
+            display: none;
+        }
+
+        .file-name {
+            font-size: 0.75rem;
+            color: var(--sub-text);
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        /* Export/Import Buttons */
+        .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-row .menu-btn {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Range Slider */
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--input-bg);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .range-value {
+            font-size: 0.75rem;
+            color: var(--sub-text);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        /* Hidden file input */
+        #import-input, #bg-upload {
+            display: none;
+        }
+
+        /* Scrollbar styling */
+        #settings-menu::-webkit-scrollbar,
+        #customize-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #settings-menu::-webkit-scrollbar-track,
+        #customize-menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #settings-menu::-webkit-scrollbar-thumb,
+        #customize-menu::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
 
-    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+    <video id="background-media" autoplay muted loop playsinline></video>
+    <div id="background-overlay"></div>
+
+    <div class="btn-container">
+        <button class="customize-btn" onclick="toggleCustomize()" title="Customize">🎨</button>
+        <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙️</button>
+    </div>
+
+    <div id="customize-menu">
+        <div class="menu-title">🎨 Customization</div>
+        
+        <div class="section-title">Theme Presets</div>
+        <div class="theme-grid">
+            <div class="theme-preset active" data-theme="dark" onclick="applyThemePreset('dark')">🌙 Dark</div>
+            <div class="theme-preset" data-theme="light" onclick="applyThemePreset('light')">☀️ Light</div>
+            <div class="theme-preset" data-theme="midnight" onclick="applyThemePreset('midnight')">🌌 Midnight</div>
+            <div class="theme-preset" data-theme="sunset" onclick="applyThemePreset('sunset')">🌅 Sunset</div>
+        </div>
+        <button class="menu-btn btn-small" onclick="resetToDefault()">↩️ Reset to Default</button>
+
+        <hr class="section-divider">
+
+        <div class="section-title">Clock Type</div>
+        <div class="toggle-row">
+            <label>Analog Clock</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="analogToggle" onchange="toggleClockType()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <hr class="section-divider">
+
+        <div class="section-title">Text Colors</div>
+        <div class="color-row">
+            <label>Time</label>
+            <input type="color" class="color-picker" id="timeColor" value="#ffffff" onchange="updateColors()">
+        </div>
+        <div class="color-row">
+            <label>Date</label>
+            <input type="color" class="color-picker" id="dateColor" value="#ffffff" onchange="updateColors()">
+        </div>
+        <div class="color-row">
+            <label>Calendar Label</label>
+            <input type="color" class="color-picker" id="calendarColor" value="#3498db" onchange="updateColors()">
+        </div>
+        <div class="color-row">
+            <label>Location</label>
+            <input type="color" class="color-picker" id="locationColor" value="#888888" onchange="updateColors()">
+        </div>
+        <div class="color-row">
+            <label>Weather</label>
+            <input type="color" class="color-picker" id="weatherColor" value="#ffffff" onchange="updateColors()">
+        </div>
+
+        <hr class="section-divider">
+
+        <div class="section-title">Background</div>
+        <div class="color-row">
+            <label>Background Color</label>
+            <input type="color" class="color-picker" id="bgColor" value="#0a0a0a" onchange="updateColors()">
+        </div>
+        
+        <div class="setting-item">
+            <label>Background Media</label>
+            <div class="file-upload-wrapper">
+                <label class="file-upload-btn">
+                    📁 Upload Image, GIF, or Video
+                    <input type="file" id="bg-upload" accept="image/*,video/*" onchange="handleBgUpload(event)">
+                </label>
+            </div>
+            <div class="file-name" id="bg-file-name"></div>
+            <button class="menu-btn btn-small" onclick="removeBgMedia()" style="margin-top: 8px;">🗑️ Remove Media</button>
+        </div>
+
+        <div class="setting-item">
+            <label>Background Overlay Opacity</label>
+            <input type="range" class="range-slider" id="overlayOpacity" min="0" max="100" value="0" onchange="updateOverlay()">
+            <div class="range-value"><span id="opacityValue">0</span>%</div>
+        </div>
+
+        <hr class="section-divider">
+
+        <div class="section-title">Import / Export Theme</div>
+        <div class="btn-row">
+            <button class="menu-btn btn-small" onclick="exportTheme()">📤 Export</button>
+            <button class="menu-btn btn-small" onclick="document.getElementById('import-input').click()">📥 Import</button>
+        </div>
+        <input type="file" id="import-input" accept=".json" onchange="importTheme(event)">
+    </div>
 
     <div id="settings-menu">
+        <div class="menu-title">⚙️ Settings</div>
+        
         <div class="setting-item">
             <label id="lbl-lang">Language</label>
             <select id="langSelect" onchange="saveSettings()"></select>
@@ -170,8 +640,6 @@
             <input type="text" id="zoneInput" class="custom-input" onfocus="showList()" oninput="filterZones()">
             <div id="zoneList" class="dropdown-list"></div>
         </div>
-
-        <button class="menu-btn" id="btn-theme" onclick="toggleTheme()">🌓 Toggle Appearance</button>
     </div>
 
     <div class="container">
@@ -179,6 +647,14 @@
             <span id="weather-temp">--</span>
             <span id="weather-desc">...</span>
         </div>
+        
+        <div class="analog-clock" id="analog-clock">
+            <div class="center-dot"></div>
+            <div class="hand hour-hand" id="hour-hand"></div>
+            <div class="hand minute-hand" id="minute-hand"></div>
+            <div class="hand second-hand" id="second-hand"></div>
+        </div>
+
         <div id="time">00:00:00</div>
         <span id="calendar-label"></span>
         <div id="date">...</div>
@@ -193,11 +669,77 @@
             "en-US": { lang: "Language", cal: "Calendar System", format: "Clock Format", unit: "Temperature Unit", search: "Search Time Zone", theme: "🌓 Toggle Appearance", auto: "Auto-Detect", placeholder: "Search City...", humidity: "Humidity" },
             "ar-SA": { lang: "اللغة", cal: "نظام التقويم", format: "تنسيق الوقت", unit: "وحدة الحرارة", search: "بحث عن المنطقة الزمنية", theme: "🌓 تغيير المظهر", auto: "كشف تلقائي", placeholder: "بحث عن مدينة...", humidity: "رطوبة" },
             "zh-CN": { lang: "语言", cal: "日历系统", format: "时钟格式", unit: "温度单位", search: "搜索时区", theme: "🌓 切换外观", auto: "自动检测", placeholder: "搜索城市...", humidity: "湿度" },
-            // ... (Additional translations would follow this pattern)
+        };
+
+        // Default theme configuration
+        const defaultTheme = {
+            timeColor: '#ffffff',
+            dateColor: '#ffffff',
+            calendarColor: '#3498db',
+            locationColor: '#888888',
+            weatherColor: '#ffffff',
+            bgColor: '#0a0a0a',
+            overlayOpacity: 0,
+            isAnalog: false,
+            preset: 'dark',
+            bgMedia: null,
+            bgMediaType: null
+        };
+
+        // Theme presets
+        const themePresets = {
+            dark: {
+                timeColor: '#ffffff',
+                dateColor: '#ffffff',
+                calendarColor: '#3498db',
+                locationColor: '#888888',
+                weatherColor: '#ffffff',
+                bgColor: '#0a0a0a',
+                preset: 'dark'
+            },
+            light: {
+                timeColor: '#1a1a1a',
+                dateColor: '#1a1a1a',
+                calendarColor: '#3498db',
+                locationColor: '#666666',
+                weatherColor: '#1a1a1a',
+                bgColor: '#ffffff',
+                preset: 'light'
+            },
+            midnight: {
+                timeColor: '#a78bfa',
+                dateColor: '#c4b5fd',
+                calendarColor: '#8b5cf6',
+                locationColor: '#7c3aed',
+                weatherColor: '#ddd6fe',
+                bgColor: '#0f0a1f',
+                preset: 'midnight'
+            },
+            sunset: {
+                timeColor: '#fbbf24',
+                dateColor: '#fb923c',
+                calendarColor: '#f97316',
+                locationColor: '#ea580c',
+                weatherColor: '#fde68a',
+                bgColor: '#1c1917',
+                preset: 'sunset'
+            }
         };
 
         const state = { is24Hour: true, timeZone: 'auto', lang: 'en-US', calendar: 'gregory', unit: 'C' };
+        let customTheme = JSON.parse(JSON.stringify(defaultTheme));
         let allZones = Intl.supportedValuesOf('timeZone');
+
+        // Generate hour markers for analog clock
+        function generateHourMarkers() {
+            const clock = document.getElementById('analog-clock');
+            for (let i = 0; i < 12; i++) {
+                const marker = document.createElement('div');
+                marker.className = 'hour-marker';
+                marker.style.transform = `rotate(${i * 30}deg)`;
+                clock.appendChild(marker);
+            }
+        }
 
         function translateUI() {
             const t = translations[state.lang] || translations["en-US"];
@@ -208,7 +750,6 @@
             document.getElementById('lbl-format').textContent = t.format;
             document.getElementById('lbl-unit').textContent = t.unit;
             document.getElementById('lbl-search').textContent = t.search;
-            document.getElementById('btn-theme').textContent = t.theme;
             document.getElementById('zoneInput').placeholder = t.placeholder;
 
             const langSelect = document.getElementById('langSelect');
@@ -265,12 +806,312 @@
 
         function toggleSettings() {
             const menu = document.getElementById('settings-menu');
+            const customizeMenu = document.getElementById('customize-menu');
+            customizeMenu.style.display = 'none';
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        function toggleCustomize() {
+            const menu = document.getElementById('customize-menu');
+            const settingsMenu = document.getElementById('settings-menu');
+            settingsMenu.style.display = 'none';
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function applyThemePreset(presetName) {
+            const preset = themePresets[presetName];
+            if (!preset) return;
+
+            // Update custom theme with preset values
+            Object.assign(customTheme, preset);
+            
+            // Update UI
+            document.getElementById('timeColor').value = preset.timeColor;
+            document.getElementById('dateColor').value = preset.dateColor;
+            document.getElementById('calendarColor').value = preset.calendarColor;
+            document.getElementById('locationColor').value = preset.locationColor;
+            document.getElementById('weatherColor').value = preset.weatherColor;
+            document.getElementById('bgColor').value = preset.bgColor;
+
+            // Update active preset button
+            document.querySelectorAll('.theme-preset').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === presetName);
+            });
+
+            // Handle light mode class for panel styling
+            if (presetName === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+
+            updateColors();
+            saveCustomTheme();
+        }
+
+        function resetToDefault() {
+            customTheme = JSON.parse(JSON.stringify(defaultTheme));
+            removeBgMedia();
+            applyThemePreset('dark');
+            document.getElementById('analogToggle').checked = false;
+            document.getElementById('overlayOpacity').value = 0;
+            document.getElementById('opacityValue').textContent = '0';
+            toggleClockType();
+            updateOverlay();
+            saveCustomTheme();
+        }
+
+        function toggleClockType() {
+            const isAnalog = document.getElementById('analogToggle').checked;
+            customTheme.isAnalog = isAnalog;
+            
+            const analogClock = document.getElementById('analog-clock');
+            const digitalTime = document.getElementById('time');
+            
+            if (isAnalog) {
+                analogClock.classList.add('active');
+                digitalTime.classList.add('hidden');
+            } else {
+                analogClock.classList.remove('active');
+                digitalTime.classList.remove('hidden');
+            }
+            
+            saveCustomTheme();
+        }
+
+        function updateColors() {
+            customTheme.timeColor = document.getElementById('timeColor').value;
+            customTheme.dateColor = document.getElementById('dateColor').value;
+            customTheme.calendarColor = document.getElementById('calendarColor').value;
+            customTheme.locationColor = document.getElementById('locationColor').value;
+            customTheme.weatherColor = document.getElementById('weatherColor').value;
+            customTheme.bgColor = document.getElementById('bgColor').value;
+
+            // Apply colors
+            document.documentElement.style.setProperty('--time-color', customTheme.timeColor);
+            document.documentElement.style.setProperty('--date-color', customTheme.dateColor);
+            document.documentElement.style.setProperty('--calendar-color', customTheme.calendarColor);
+            document.documentElement.style.setProperty('--location-color', customTheme.locationColor);
+            document.documentElement.style.setProperty('--weather-color', customTheme.weatherColor);
+            document.documentElement.style.setProperty('--bg-color', customTheme.bgColor);
+
+            // Clear preset selection if colors don't match any preset
+            let matchesPreset = false;
+            for (const [name, preset] of Object.entries(themePresets)) {
+                if (preset.timeColor === customTheme.timeColor &&
+                    preset.dateColor === customTheme.dateColor &&
+                    preset.calendarColor === customTheme.calendarColor &&
+                    preset.locationColor === customTheme.locationColor &&
+                    preset.weatherColor === customTheme.weatherColor &&
+                    preset.bgColor === customTheme.bgColor) {
+                    matchesPreset = true;
+                    customTheme.preset = name;
+                    document.querySelectorAll('.theme-preset').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.theme === name);
+                    });
+                    break;
+                }
+            }
+            
+            if (!matchesPreset) {
+                customTheme.preset = 'custom';
+                document.querySelectorAll('.theme-preset').forEach(btn => btn.classList.remove('active'));
+            }
+
+            saveCustomTheme();
+        }
+
+        function updateOverlay() {
+            const opacity = document.getElementById('overlayOpacity').value;
+            customTheme.overlayOpacity = parseInt(opacity);
+            document.getElementById('opacityValue').textContent = opacity;
+            document.getElementById('background-overlay').style.background = `rgba(0, 0, 0, ${opacity / 100})`;
+            saveCustomTheme();
+        }
+
+        function handleBgUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                const mediaEl = document.getElementById('background-media');
+                
+                if (file.type.startsWith('video/')) {
+                    mediaEl.style.display = 'block';
+                    mediaEl.src = dataUrl;
+                    mediaEl.play();
+                    document.body.style.backgroundImage = 'none';
+                    customTheme.bgMediaType = 'video';
+                } else {
+                    mediaEl.style.display = 'none';
+                    mediaEl.src = '';
+                    document.body.style.backgroundImage = `url(${dataUrl})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                    customTheme.bgMediaType = 'image';
+                }
+                
+                customTheme.bgMedia = dataUrl;
+                document.getElementById('bg-file-name').textContent = file.name;
+                saveCustomTheme();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeBgMedia() {
+            const mediaEl = document.getElementById('background-media');
+            mediaEl.style.display = 'none';
+            mediaEl.src = '';
+            document.body.style.backgroundImage = 'none';
+            customTheme.bgMedia = null;
+            customTheme.bgMediaType = null;
+            document.getElementById('bg-file-name').textContent = '';
+            document.getElementById('bg-upload').value = '';
+            saveCustomTheme();
+        }
+
+        function applyBgMedia() {
+            if (!customTheme.bgMedia) return;
+            
+            const mediaEl = document.getElementById('background-media');
+            
+            if (customTheme.bgMediaType === 'video') {
+                mediaEl.style.display = 'block';
+                mediaEl.src = customTheme.bgMedia;
+                mediaEl.play();
+                document.body.style.backgroundImage = 'none';
+            } else if (customTheme.bgMediaType === 'image') {
+                mediaEl.style.display = 'none';
+                document.body.style.backgroundImage = `url(${customTheme.bgMedia})`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+            }
+        }
+
+        function exportTheme() {
+            const exportData = {
+                version: 1,
+                theme: customTheme,
+                settings: state
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clock-theme-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importTheme(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.theme) {
+                        customTheme = { ...defaultTheme, ...data.theme };
+                        
+                        // Apply imported theme
+                        document.getElementById('timeColor').value = customTheme.timeColor;
+                        document.getElementById('dateColor').value = customTheme.dateColor;
+                        document.getElementById('calendarColor').value = customTheme.calendarColor;
+                        document.getElementById('locationColor').value = customTheme.locationColor;
+                        document.getElementById('weatherColor').value = customTheme.weatherColor;
+                        document.getElementById('bgColor').value = customTheme.bgColor;
+                        document.getElementById('overlayOpacity').value = customTheme.overlayOpacity || 0;
+                        document.getElementById('opacityValue').textContent = customTheme.overlayOpacity || 0;
+                        document.getElementById('analogToggle').checked = customTheme.isAnalog || false;
+                        
+                        // Update preset buttons
+                        document.querySelectorAll('.theme-preset').forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.theme === customTheme.preset);
+                        });
+
+                        // Handle light mode
+                        if (customTheme.preset === 'light') {
+                            document.body.classList.add('light-mode');
+                        } else {
+                            document.body.classList.remove('light-mode');
+                        }
+                        
+                        updateColors();
+                        updateOverlay();
+                        toggleClockType();
+                        applyBgMedia();
+                    }
+                    
+                    if (data.settings) {
+                        Object.assign(state, data.settings);
+                        document.getElementById('formatSelect').value = state.is24Hour ? '24' : '12';
+                        document.getElementById('unitSelect').value = state.unit;
+                        translateUI();
+                    }
+                    
+                    saveCustomTheme();
+                    saveSettings();
+                    
+                    alert('Theme imported successfully!');
+                } catch (err) {
+                    alert('Error importing theme. Please check the file format.');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function saveCustomTheme() {
+            // Don't save bgMedia if it's too large (>2MB becomes base64 ~2.6MB)
+            const saveData = { ...customTheme };
+            if (saveData.bgMedia && saveData.bgMedia.length > 2500000) {
+                saveData.bgMedia = null;
+                saveData.bgMediaType = null;
+            }
+            localStorage.setItem('clockCustomTheme', JSON.stringify(saveData));
+        }
+
+        function loadCustomTheme() {
+            const saved = localStorage.getItem('clockCustomTheme');
+            if (saved) {
+                try {
+                    customTheme = { ...defaultTheme, ...JSON.parse(saved) };
+                } catch (e) {
+                    customTheme = JSON.parse(JSON.stringify(defaultTheme));
+                }
+            }
+            
+            // Apply loaded theme
+            document.getElementById('timeColor').value = customTheme.timeColor;
+            document.getElementById('dateColor').value = customTheme.dateColor;
+            document.getElementById('calendarColor').value = customTheme.calendarColor;
+            document.getElementById('locationColor').value = customTheme.locationColor;
+            document.getElementById('weatherColor').value = customTheme.weatherColor;
+            document.getElementById('bgColor').value = customTheme.bgColor;
+            document.getElementById('overlayOpacity').value = customTheme.overlayOpacity || 0;
+            document.getElementById('opacityValue').textContent = customTheme.overlayOpacity || 0;
+            document.getElementById('analogToggle').checked = customTheme.isAnalog || false;
+            
+            // Update preset buttons
+            document.querySelectorAll('.theme-preset').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === customTheme.preset);
+            });
+
+            // Handle light mode panel styling
+            if (customTheme.preset === 'light') {
+                document.body.classList.add('light-mode');
+            }
+            
+            updateColors();
+            updateOverlay();
+            toggleClockType();
+            applyBgMedia();
         }
 
         function saveSettings() {
@@ -278,7 +1119,7 @@
             state.lang = document.getElementById('langSelect').value;
             state.calendar = document.getElementById('calendarSelect').value;
             state.unit = document.getElementById('unitSelect').value;
-            localStorage.setItem('clockSettingsV11', JSON.stringify(state));
+            localStorage.setItem('clockSettingsV12', JSON.stringify(state));
             translateUI();
             updateClock();
             updateWeather();
@@ -286,7 +1127,7 @@
 
         function updateWeather() {
             const t = translations[state.lang] || translations["en-US"];
-            let tempC = 22; // Base dummy data
+            let tempC = 22;
             let displayTemp = state.unit === 'F' ? Math.round((tempC * 9/5) + 32) : tempC;
             
             document.getElementById('weather-temp').textContent = `${displayTemp}°${state.unit}`;
@@ -294,13 +1135,12 @@
         }
 
         function loadSettings() {
-            const saved = localStorage.getItem('clockSettingsV11');
+            const saved = localStorage.getItem('clockSettingsV12');
             if (saved) {
                 Object.assign(state, JSON.parse(saved));
                 document.getElementById('formatSelect').value = state.is24Hour ? '24' : '12';
                 document.getElementById('unitSelect').value = state.unit;
             }
-            if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
             translateUI();
         }
 
@@ -316,10 +1156,40 @@
             document.getElementById('calendar-label').textContent = state.calendar;
             document.getElementById('location-display').textContent = tz.replace(/_/g, ' ');
             document.body.dir = state.lang.startsWith('ar') ? 'rtl' : 'ltr';
+
+            // Update analog clock
+            if (customTheme.isAnalog) {
+                const hours = now.getHours() % 12;
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+                
+                const hourDeg = (hours * 30) + (minutes * 0.5);
+                const minuteDeg = (minutes * 6) + (seconds * 0.1);
+                const secondDeg = seconds * 6;
+                
+                document.getElementById('hour-hand').style.transform = `rotate(${hourDeg}deg)`;
+                document.getElementById('minute-hand').style.transform = `rotate(${minuteDeg}deg)`;
+                document.getElementById('second-hand').style.transform = `rotate(${secondDeg}deg)`;
+            }
         }
 
-        document.addEventListener('click', (e) => { if (!e.target.closest('.setting-item')) document.getElementById('zoneList').style.display = 'none'; });
+        // Close menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.setting-item')) {
+                document.getElementById('zoneList').style.display = 'none';
+            }
+            if (!e.target.closest('#customize-menu') && !e.target.closest('.customize-btn')) {
+                // Keep customize menu handling separate
+            }
+            if (!e.target.closest('#settings-menu') && !e.target.closest('.settings-btn')) {
+                // Keep settings menu handling separate
+            }
+        });
+
+        // Initialize
+        generateHourMarkers();
         loadSettings();
+        loadCustomTheme();
         setInterval(updateClock, 1000);
         updateClock();
         updateWeather();
