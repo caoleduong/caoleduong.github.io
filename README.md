@@ -26,10 +26,11 @@ Here’s a high-level view of the key files:
 | File | Purpose |
 |------|---------|
 | `index.html` | Main homepage content |
-| `e.html`, `p.html`, `s.html` | Additional pages or sections |
 | `favicon.png` | Website icon |
 | `README.md` | Project description |
-| (other assets) | Supporting images/scripts |
+| (Various Pages) | Additional pages or sections |
+| (Folders) | Additional sections |
+| (Other Assets) | Supporting images/scripts |
 
 The site is pure **HTML/JS/CSS** (no build tools) and static, which makes it easy to update and maintain.
 
@@ -44,6 +45,6 @@ If you would like to modify my website or use it as a template:
    ```bash
    git clone https://github.com/caoleduong/caoleduong.github.io.git
 
-2. To host the repository on **GitHub Pages**, you can view the **GitHub Pages documentation** by clicking the link below:
+2. You can use various hosting services that support static websites, such as GitHub Pages, Netlify, or Vercel. To host the repository on **GitHub Pages**, you can view the **GitHub Pages documentation** by clicking the link below:
 
    https://pages.github.com/
