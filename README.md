@@ -1,4 +1,4 @@
-# My Personal Website "caoleduong.gtihub.io"
+# My Personal Website "caoleduong.github.io"
 
 Welcome to my personal website. It's a website that I made that links my **social profiles**, **projects**, and **GitHub activity**.
 This repository powers a GitHub Pages website that shows my presence online, my GitHub activity, and other things about me.
