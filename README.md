@@ -40,11 +40,12 @@ The site is pure **HTML/JS/CSS** (no build tools) and static, which makes it eas
 
 If you would like to modify my website or use it as a template:
 
-1. **Fork this repository** or clone it locally:
+1. **Fork this repository** or clone it locally.
+   If you have Git, this is the command:
 
    ```bash
    git clone https://github.com/caoleduong/caoleduong.github.io.git
 
-2. You can use various hosting services that support static websites, such as GitHub Pages, Netlify, or Vercel. To host the repository on **GitHub Pages**, you can view the **GitHub Pages documentation** by clicking the link below:
+3. You can use various hosting services that support static websites, such as GitHub Pages, Netlify, or Vercel. To host the repository on **GitHub Pages**, you can view the **GitHub Pages documentation** by clicking the link below:
 
    https://pages.github.com/
