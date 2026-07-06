@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reagan Cao</title>
+  <meta name="description" content="caoleduong.github.io">
+  <link rel="icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --background: #0d0d0f;
+      --foreground: #f0f0f0;
+      --border: #2a2a30;
+      --muted-foreground: #a0a0a0;
+    }
+
+    body {
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #circuit-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(to bottom, #000000, #0a0a0a);
+    }
+
+    main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 24rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.025em;
+    }
+
+    .header p {
+      margin-top: 0.5rem;
+      color: var(--muted-foreground);
+      font-size: 0.875rem;
+    }
+
+    /* Centered Content Card */
+    .content-card {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: rgba(20, 20, 24, 0.8);
+      backdrop-filter: blur(8px);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: center; /* centered text */
+    }
+
+    .content-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--foreground);
+    }
+
+    .content-text {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="circuit-canvas"></canvas>
+
+  <main>
+    <div class="container">
+      <div class="header">
+        <h1>Reagan Cao</h1>
+        <p>San Diego, CA</p>
+      </div>
+
+      <div class="content-card">
+        <h2 class="content-title">Learning JavaScript</h2>
+        <p class="content-text">One of the projects we completed in Mr. Chris's class was working with JavaScript on Khan Academy. To be honest, I had already used JavaScript since I was 9 years old, so this is not really new to me. Looking back on this, I think I really did a good job on coding these projects.</p>
+      </div>
+
+      <div class="content-card">
+        <h2 class="content-title">JavaScript</h2>
+        <p class="content-text">draw = function() {
+    if (mouseIsPressed) {
+        fill(0, 0, 0);
+        noStroke();
+        ellipse(mouseX, mouseY, 20, 20);
+    }
+};</p>
+      </div>
+
+      <div class="content-card">
+        <h2 class="content-title">JavaScript</h2>
+        <p class="content-text">draw = function() {
+stroke(230, 55, 230);
+    fill(mouseX, mouseY, mouseX);
+    ellipse(mouseX, mouseY, 100, 100);
+};</p>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('circuit-canvas');
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const lines = [];
+      const lineCount = 40;
+
+      for (let i = 0; i < lineCount; i++) {
+        lines.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          length: Math.random() * 150 + 50,
+          horizontal: Math.random() > 0.5,
+          speed: Math.random() * 0.3 + 0.1,
+          opacity: Math.random() * 0.5 + 0.1,
+          glowIntensity: Math.random() * 0.5 + 0.5
+        });
+      }
+
+      function animate() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        lines.forEach(line => {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(0, 180, 216, ${line.opacity})`;
+          ctx.lineWidth = 1;
+          ctx.shadowColor = `rgba(0, 180, 216, ${line.glowIntensity})`;
+          ctx.shadowBlur = 8;
+
+          if (line.horizontal) {
+            ctx.moveTo(line.x, line.y);
+            ctx.lineTo(line.x + line.length, line.y);
+            line.x += line.speed;
+            if (line.x > canvas.width) {
+              line.x = -line.length;
+              line.y = Math.random() * canvas.height;
+            }
+          } else {
+            ctx.moveTo(line.x, line.y);
+            ctx.lineTo(line.x, line.y + line.length);
+            line.y += line.speed;
+            if (line.y > canvas.height) {
+              line.y = -line.length;
+              line.x = Math.random() * canvas.width;
+            }
+          }
+
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          if (Math.random() > 0.99) {
+            ctx.fillStyle = `rgba(0, 180, 216, ${line.opacity * 2})`;
+            ctx.fillRect(line.x - 2, line.y - 2, 4, 4);
+          }
+        });
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+  </script>
+</body>
+</html>
